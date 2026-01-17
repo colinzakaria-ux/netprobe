@@ -44,5 +44,4 @@ Ping a target 5 times:
 
 MIT
 
-```
 
