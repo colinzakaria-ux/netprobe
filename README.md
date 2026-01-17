@@ -17,10 +17,6 @@ git clone [https://github.com/your-username/netprobe.git](https://github.com/you
 cd netprobe
 chmod +x netprobe.py
 ``` 
-```
-```  
-```
-```
 
 ## Usage
 
