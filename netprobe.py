@@ -3,18 +3,20 @@ import subprocess
 import argparse
 import sys
 
-# UPDATE 1: Add 'count' as a parameter
 def connectivity(target_ip, count):
-    # If count is 10, timeout becomes 17 seconds.
-    dynamic_timeout = (count * 1.5) + 2
-    
+    """
+    Pings a target IP a specific number of times.
+    Returns True if successful, False otherwise.
+    """
+    # Dynamic timeout: 1.5s per ping + 2s buffer overhead
+    timeout_limit = (count * 1.5) + 2
+
     try:
-        # UPDATE 2: Use str(count) in the command list
-        result=subprocess.run(
+        result = subprocess.run(
             ["ping", "-c", str(count), target_ip],
             capture_output=True,
             text=True,
-            timeout=dynamic_timeout
+            timeout=timeout_limit
         )
 
     except subprocess.TimeoutExpired:
@@ -24,7 +26,6 @@ def connectivity(target_ip, count):
     if result.returncode == 0:
         print(f"Ping to {target_ip} successful.")
         return True
-
     else:
         print(f"Ping to {target_ip} failed.")
         if result.stderr:
@@ -32,29 +33,22 @@ def connectivity(target_ip, count):
         return False
 
 def main():
-    # 1. Initialize the Parser
-    # This creates the object that handles the logic
-    parser = argparse.ArgumentParser(description="Network Connectivity Tester")
-
-    # 2. Add the Target Argument (Positional)
-    # Because there are no dashes (-), this is required.
-    parser.add_argument("target", help="The IP address to ping")
-
-    # 3. Add the Count Argument (Optional)
-    # We add '-c' and '--count' so the user can use either.
-    # type=int: Ensures the script crashes nicely if the user types "five" instead of "5"
-    # default=1: If the user ignores this flag, we just ping once.
+    parser = argparse.ArgumentParser(description="NetProbe - Network Connectivity Tester")
+    parser.add_argument("target", help="The IP address or hostname to ping")
     parser.add_argument("-c", "--count", type=int, default=1, help="Number of pings (default: 1)")
-
-    # 4. Parse the Arguments
-    # This checks what the user typed in the terminal against the rules above.
+    
     args = parser.parse_args()
 
-    # 5. Pass the data to your function
-    # args.target holds the IP ("8.8.8.8")
-    # args.count holds the number (5)
     print(f"Pinging {args.target} {args.count} times...")
-    connectivity(args.target, args.count)
 
-if __name__=="__main__":
+    try:
+        success = connectivity(args.target, args.count)
+        if not success:
+            sys.exit(1)
+            
+    except KeyboardInterrupt:
+        print("\nOperation cancelled by user.")
+        sys.exit(0)
+
+if __name__ == "__main__":
     main()
